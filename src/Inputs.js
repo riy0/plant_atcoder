@@ -3,6 +3,12 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import Map from './Map';
 
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import './inputs.css';
+
 var sub = new XMLHttpRequest();
 var prob = new XMLHttpRequest();
 
@@ -26,10 +32,45 @@ function addCount(d) {
   }
 }
 
+const styles = theme => ({
+    container: {
+      display: 'flex',
+      flexWrap: 'wrap',
+    },
+    textField: {
+      marginLeft: theme.spacing.unit,
+      marginRight: theme.spacing.unit,
+      width: 200,
+    },
+    dense: {
+      marginTop: 19,
+    },
+    menu: {
+      width: 200,
+    },
+    button: {
+        margin: theme.spacing.unit,
+      },
+    input: {
+        display: 'none',
+    },
+    progress: {
+        margin: theme.spacing.unit * 2,
+    },
+  });
+
 export default class Inputs extends Component {
   load() {
     if (sub.readyState === 4 && prob.readyState === 4){
       if (sub.status === 200 && prob.status === 200){
+
+        const problem = JSON.parse(prob.responseText);
+        var prob_dic = {}
+
+        for (const e in problem) {
+          prob_dic[problem[e]['contest_id'] + problem[e]['id']] = problem[e]['title'];
+        }
+
 
         const atcoder = JSON.parse(sub.responseText);
 
@@ -41,8 +82,8 @@ export default class Inputs extends Component {
             const tmp = {
               'site' : 'atcoder',
               'subtime' : subtime,
-              'contestId' : data['contest_id'],
-              'title' : data['id'],
+              'contestId' : data['contest_id'].toUpperCase(),
+              'title' : prob_dic[data['contest_id'] + data['problem_id']],
               'point' : data['point']
             }
             subs[subtime] = tmp;
@@ -61,10 +102,10 @@ export default class Inputs extends Component {
         ReactDOM.render(<Map data = {calendar} />, document.getElementById('map'));
 
       }else{
-        ReactDOM.render(<div>failed. please reload</div>, document.getElementById('status'));
+        ReactDOM.render(<div className='fail'>Fail</div>, document.getElementById('status'));
       }
     }else{
-      ReactDOM.render(<div>loading</div>, document.getElementById('status'));
+      ReactDOM.render(<div CircularProgress className={styles.progress}></div>, document.getElementById('status'));
     }
   }
 
@@ -85,12 +126,19 @@ export default class Inputs extends Component {
 
   render() {
     return (
-      <div>
-        <div> id </div>
-        <div>atcoder id</div>
-        <input type = "text" id = "id" value = "tourist"></input>
-        <button type = "button" onClick = {() => this.send()}>getData</button>
-      </div>
+      <Paper className = 'inputbar'>
+        <TextField
+          id="id"
+          label="AtCoder ID"
+          className={styles.textField}
+          margin="normal"
+        />
+        <div></div>
+        <br></br>
+        <div id = 'status'>
+          <Button variant="outlined" color="primary" className={styles.button} onClick = {() => this.send()} > Search </Button>
+        </div>
+      </Paper>
     )
   }
 }

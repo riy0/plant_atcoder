@@ -1,0 +1,10 @@
+.inputbar {
+  width: 50%;
+  text-align: center;
+  padding: 10px;
+  margin: 0 auto;
+}
+
+.fail {
+  color: red;
+}
